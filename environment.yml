@@ -4,3 +4,4 @@ dependencies:
   - pip:
     - python-telegram-bot-13.7
     - requests
+    - webvtt-py
