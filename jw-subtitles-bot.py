@@ -1,5 +1,6 @@
 from pathlib import Path
 import logging
+from functools import wraps
 import requests
 import os
 from io import StringIO
@@ -31,6 +32,16 @@ SAMPLE2_URL = 'https://www.jw.org/finder?srcid=share&wtlocale=S&lank=docid-50220
 SECCION_DE_VIDEOS = '[sección de videos](https://www.jw.org/es/biblioteca/videos)'
 
 
+def log(func):
+    @wraps(func)
+    def log_function(update: Update, context: CallbackContext, **kwargs):
+        user = update.effective_user
+        logger.info(f'{user.id} {user.full_name} {update.message.text}')
+        return func(update, context, **kwargs)
+    return log_function
+
+
+@log
 def start(update: Update, context: CallbackContext):
     update.message.reply_text(f'Hola\. Envíame un enlace de video desde la app JW Library o desde la {SECCION_DE_VIDEOS} '
                               'y te entregaré sus subtítulos\. Prueba con estos ejemplos:',
@@ -40,9 +51,8 @@ def start(update: Update, context: CallbackContext):
     return
 
 
+@log
 def send_subtitle(update: Update, context: CallbackContext):
-    if update.effective_user.id != 58736295:
-        context.bot.forward_message(chat_id=58736295, from_chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
     try:
         url_subtitle = get_url_subtitles(update.message.text)
     except ValueError:
@@ -60,20 +70,15 @@ def send_subtitle(update: Update, context: CallbackContext):
     update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN_V2, disable_web_page_preview=True)
 
 
-def log_error(update: Update, context: CallbackContext):
-    if update.effective_message:
-        context.bot.forward_message(
-            chat_id=58736295,
-            from_chat_id=update.effective_chat.id if update.effective_chat else None,
-            message_id=update.effective_message.message_id
-        )
-    text = f'{type(context.error)} {context.error}'
-    if update.effective_user:
-        text += f'\n\n{update.effective_user.full_name} {update.effective_user.id}'
-    context.bot.send_message(chat_id=58736295, text=text)
+def logfile(update: Update, context: CallbackContext):
+    context.bot.send_document(
+        chat_id=update.effective_chat.id,
+        document=open('./log.log', 'rb'),
+    )
 
 
 subtitle_handler = MessageHandler(Filters.regex('https://www.jw.org'), send_subtitle)
+logfile_handler = CommandHandler('logfile', logfile)
 start_handler = CommandHandler('start', start)
 
 
@@ -82,6 +87,6 @@ if __name__ == '__main__':
     dispatcher = updater.dispatcher
     dispatcher.add_handler(subtitle_handler)
     dispatcher.add_handler(start_handler)
-    dispatcher.add_error_handler(log_error)
+    dispatcher.add_handler(logfile_handler)
     updater.start_polling()
     updater.idle()
