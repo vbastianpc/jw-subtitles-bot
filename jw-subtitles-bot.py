@@ -62,11 +62,12 @@ def send_subtitle(update: Update, context: CallbackContext):
     except SubtitleNotFound:
         text = 'Parece que este video no tiene subtítulos disponibles'
     else:
-        print(url_subtitle)
+        logger.info(url_subtitle)
         text_vtt = requests.get(url_subtitle).content.decode()
         update.message.reply_document(document=InputFile(StringIO(text_vtt), filename=Path(url_subtitle).name))
         update.message.reply_document(document=InputFile(StringIO(parse_vtt(text_vtt)), filename=Path(url_subtitle).stem + '.txt'))
         return
+    logger.info(text)
     update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN_V2, disable_web_page_preview=True)
 
 
