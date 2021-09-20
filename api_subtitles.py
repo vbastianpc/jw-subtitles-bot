@@ -33,7 +33,6 @@ def get_code_lang(locale):
 def get_subtitles_from_mediator(code_lang, lank):
     url = API_MEDIATOR.format(code_lang=code_lang, lank=lank)
     data = requests.get(url).json()
-    print(url)
     for file in data['media'][0]['files']:
         if file.get('subtitles'):
             break
@@ -58,7 +57,6 @@ def get_url_subtitles(url):
 def parse_vtt(text_vtt):
     text = ''
     for caption in webvtt.read_buffer(StringIO(text_vtt)):
-        print(f'{caption.text!r}')
         text += caption.text.replace('\n', ' ') + '\n'
         if caption.text.strip().endswith('.'):
             text += '\n'
