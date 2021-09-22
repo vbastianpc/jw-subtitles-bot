@@ -7,7 +7,7 @@ from io import StringIO
 
 from telegram import Update
 from telegram import ParseMode
-from telegram import InputFile
+from telegram import InputMediaDocument
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler
 from telegram.ext import Filters
@@ -78,8 +78,10 @@ def help(update: Update, context: CallbackContext):
 
 @log
 def send_subtitle(update: Update, context: CallbackContext):
+    jwurl = update.message.text
     try:
-        data = subs.get_datajson(update.message.text)
+        code_lang, lank = subs.parse_jwurl(jwurl)
+        data = subs.get_datajson(code_lang, lank)
         url_subtitle = subs.get_url_subtitles(data)
     except (subs.LankNotFound, ValueError, IndexError):
         text = f'En esta página no hay contenido multimedia para extraer subtítulos. Busca en la {SECCION_DE_VIDEOS} o en la app JW Library y mándame el enlace del video'
@@ -88,11 +90,22 @@ def send_subtitle(update: Update, context: CallbackContext):
     except subs.SubtitleNotFound as e:
         text = f'Lo siento, no existen subtítulos para el video\n*{e.title}*'
     else:
-        logger.info(url_subtitle)
-        text_vtt = requests.get(url_subtitle).content.decode()
-        transcription = f'{subs.get_title(data)}\n\n\n{subs.parse_vtt(text_vtt)}'
-        update.message.reply_document(document=InputFile(StringIO(text_vtt), filename=Path(url_subtitle).name))
-        update.message.reply_document(document=InputFile(StringIO(transcription), filename=Path(url_subtitle).stem + '.txt'))
+        title = subs.get_title(data)
+        logger.info('%s %s', title, url_subtitle)
+        text_subtitles = requests.get(url_subtitle).content.decode()
+        text_transcription = title + '\n\n\n' + subs.parse_vtt(text_subtitles)
+        try:
+            update.message.reply_photo(subs.get_image(data))
+        except:
+            pass
+        context.bot.send_media_group(
+            chat_id=update.effective_chat.id,
+            media=[
+                InputMediaDocument(StringIO(text_transcription), filename=Path(url_subtitle).stem + '.txt'),
+                InputMediaDocument(StringIO(text_subtitles), filename=Path(url_subtitle).name,
+                                   caption=f'[{title}]({jwurl})', parse_mode=ParseMode.MARKDOWN),
+            ],
+        )
         return
     logger.info(text)
     update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)

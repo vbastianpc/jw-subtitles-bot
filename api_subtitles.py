@@ -3,6 +3,7 @@ import requests
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
 from io import StringIO
+import random
 
 import webvtt
 
@@ -60,8 +61,7 @@ def parse_jwurl(url):
     return code_lang, lank
 
 
-def get_datajson(jwurl):
-    code_lang, lank = parse_jwurl(jwurl)
+def get_datajson(code_lang, lank):
     url = API_MEDIATOR.format(code_lang=code_lang, lank=lank)
     logger.info(url)
     return requests.get(url).json()
@@ -78,6 +78,20 @@ def get_url_subtitles(data):
 
 def get_title(data):
     return data['media'][0]['title']
+
+
+def get_any_image(data):
+    images = []
+    for v in data['media'][0]['images'].values():
+        [images.append(url) for url in v.values()]
+    return random.choice(images)
+    
+
+def get_image(data):
+    try:
+        return data['media'][0]['images']['pnr']['lg']
+    except KeyError:
+        return get_any_image(data)
 
 
 def parse_vtt(text_vtt):
