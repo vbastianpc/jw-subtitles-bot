@@ -14,11 +14,7 @@ from telegram.ext import Filters
 from telegram.ext import CallbackContext
 from telegram.ext import Updater
 
-from api_subtitles import get_url_subtitles
-from api_subtitles import parse_vtt
-from api_subtitles import CodeLangNotFound
-from api_subtitles import SubtitleNotFound
-from api_subtitles import LankNotFound
+import api_subtitles as subs
 
 
 logging.basicConfig(
@@ -83,18 +79,20 @@ def help(update: Update, context: CallbackContext):
 @log
 def send_subtitle(update: Update, context: CallbackContext):
     try:
-        url_subtitle = get_url_subtitles(update.message.text)
-    except (LankNotFound, ValueError, IndexError):
+        data = subs.get_datajson(update.message.text)
+        url_subtitle = subs.get_url_subtitles(data)
+    except (subs.LankNotFound, ValueError, IndexError):
         text = f'En esta página no hay contenido multimedia para extraer subtítulos. Busca en la {SECCION_DE_VIDEOS} o en la app JW Library y mándame el enlace del video'
-    except CodeLangNotFound as e:
+    except subs.CodeLangNotFound as e:
         text = f'{e.code_lang!r} no es un idioma válido'
-    except SubtitleNotFound as e:
+    except subs.SubtitleNotFound as e:
         text = f'Lo siento, no existen subtítulos para el video\n*{e.title}*'
     else:
         logger.info(url_subtitle)
         text_vtt = requests.get(url_subtitle).content.decode()
+        transcription = f'{subs.get_title(data)}\n\n\n{subs.parse_vtt(text_vtt)}'
         update.message.reply_document(document=InputFile(StringIO(text_vtt), filename=Path(url_subtitle).name))
-        update.message.reply_document(document=InputFile(StringIO(parse_vtt(text_vtt)), filename=Path(url_subtitle).stem + '.txt'))
+        update.message.reply_document(document=InputFile(StringIO(transcription), filename=Path(url_subtitle).stem + '.txt'))
         return
     logger.info(text)
     update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
