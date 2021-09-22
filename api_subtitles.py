@@ -1,9 +1,17 @@
+import logging
 import requests
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
 from io import StringIO
 
 import webvtt
+
+
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(funcName)s - %(levelname)s - %(message)s',
+    level=logging.INFO,
+)
+logger = logging.getLogger(__name__)
 
 
 API_MEDIATOR = 'https://b.jw-cdn.org/apis/mediator/v1/media-items/{code_lang}/{lank}?clientType=www'
@@ -35,18 +43,7 @@ def get_code_lang(locale):
         raise CodeLangNotFound(locale)
 
 
-def get_subtitles_from_mediator(code_lang, lank):
-    url = API_MEDIATOR.format(code_lang=code_lang, lank=lank)
-    data = requests.get(url).json()
-    for file in data['media'][0]['files']:
-        if file.get('subtitles'):
-            break
-    else:
-        raise SubtitleNotFound(data['media'][0]['title'])
-    return file['subtitles']['url']
-
-
-def get_url_subtitles(url):
+def parse_jwurl(url):
     up = urlparse(url)
     pq = parse_qs(up.query)
     if up.path == '/finder':
@@ -56,11 +53,31 @@ def get_url_subtitles(url):
         except KeyError:
             raise LankNotFound
     elif '/mediaitems/' in up.fragment:
-        locale, _, category, lank = up.fragment.split('/')
+        locale, _, _, lank = up.fragment.split('/')
         code_lang = get_code_lang(locale)
     else:
         raise ValueError(f'{url!r} it is not a valid url')
-    return get_subtitles_from_mediator(code_lang, lank)
+    return code_lang, lank
+
+
+def get_datajson(jwurl):
+    code_lang, lank = parse_jwurl(jwurl)
+    url = API_MEDIATOR.format(code_lang=code_lang, lank=lank)
+    logger.info(url)
+    return requests.get(url).json()
+
+
+def get_url_subtitles(data):
+    for file in data['media'][0]['files']:
+        if file.get('subtitles'):
+            break
+    else:
+        raise SubtitleNotFound(data['media'][0]['title'])
+    return file['subtitles']['url']
+
+
+def get_title(data):
+    return data['media'][0]['title']
 
 
 def parse_vtt(text_vtt):
