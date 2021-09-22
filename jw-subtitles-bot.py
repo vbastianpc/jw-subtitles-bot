@@ -18,6 +18,7 @@ from api_subtitles import get_url_subtitles
 from api_subtitles import parse_vtt
 from api_subtitles import CodeLangNotFound
 from api_subtitles import SubtitleNotFound
+from api_subtitles import LankNotFound
 
 
 logging.basicConfig(
@@ -83,12 +84,12 @@ def help(update: Update, context: CallbackContext):
 def send_subtitle(update: Update, context: CallbackContext):
     try:
         url_subtitle = get_url_subtitles(update.message.text)
-    except (ValueError, IndexError):
-        text = f'No parece un enlace válido\. Busca un video desde la {SECCION_DE_VIDEOS} o desde la app JW Library y mándame el enlace\n'
+    except (LankNotFound, ValueError, IndexError):
+        text = f'En esta página no hay contenido multimedia para extraer subtítulos. Busca en la {SECCION_DE_VIDEOS} o en la app JW Library y mándame el enlace del video'
     except CodeLangNotFound as e:
-        text = f'{e.code_lang!r} no parece un idioma válido'
-    except SubtitleNotFound:
-        text = 'Parece que este video no tiene subtítulos disponibles'
+        text = f'{e.code_lang!r} no es un idioma válido'
+    except SubtitleNotFound as e:
+        text = f'Lo siento, no existen subtítulos para el video\n*{e.title}*'
     else:
         logger.info(url_subtitle)
         text_vtt = requests.get(url_subtitle).content.decode()
@@ -96,7 +97,7 @@ def send_subtitle(update: Update, context: CallbackContext):
         update.message.reply_document(document=InputFile(StringIO(parse_vtt(text_vtt)), filename=Path(url_subtitle).stem + '.txt'))
         return
     logger.info(text)
-    update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN_V2, disable_web_page_preview=True)
+    update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
 
 
 def logfile(update: Update, context: CallbackContext):

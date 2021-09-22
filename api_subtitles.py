@@ -17,6 +17,11 @@ class CodeLangNotFound(Exception):
 
 
 class SubtitleNotFound(Exception):
+    def __init__(self, title):
+        self.title = title
+
+
+class LankNotFound(Exception):
     pass
 
 
@@ -37,7 +42,7 @@ def get_subtitles_from_mediator(code_lang, lank):
         if file.get('subtitles'):
             break
     else:
-        raise SubtitleNotFound
+        raise SubtitleNotFound(data['media'][0]['title'])
     return file['subtitles']['url']
 
 
@@ -45,7 +50,11 @@ def get_url_subtitles(url):
     up = urlparse(url)
     pq = parse_qs(up.query)
     if up.path == '/finder':
-        code_lang, lank = pq['wtlocale'][0], pq['lank'][0]
+        code_lang = pq['wtlocale'][0]
+        try:
+            lank = pq['lank'][0]
+        except KeyError:
+            raise LankNotFound
     elif '/mediaitems/' in up.fragment:
         locale, _, category, lank = up.fragment.split('/')
         code_lang = get_code_lang(locale)
