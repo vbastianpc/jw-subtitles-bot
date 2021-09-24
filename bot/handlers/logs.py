@@ -23,7 +23,8 @@ def logs(update: Update, conttext: CallbackContext):
     with open('./log.log', 'r', encoding='utf-8') as f:
         datalogs = f.read()
     update.message.reply_text(
-        text=datalogs[-MAX_MESSAGE_LENGTH::]
+        text=datalogs[-MAX_MESSAGE_LENGTH::],
+        disable_web_page_preview=True
     )
 
 def error_handler(update: object, context: CallbackContext) -> None:
@@ -41,7 +42,8 @@ def error_handler(update: object, context: CallbackContext) -> None:
         f'<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n'
         f'<pre>{html.escape(tb_string)}</pre>'
     )
-    context.bot.send_message(chat_id=DEV, text=message, parse_mode=ParseMode.HTML)
+    if DEV:
+        context.bot.send_message(chat_id=DEV, text=message, parse_mode=ParseMode.HTML)
     # chunks = [message[i:i+MAX_MESSAGE_LENGTH] for i in range(0, len(message), MAX_MESSAGE_LENGTH)]
     # for chunk in chunks:
     #     context.bot.send_message(chat_id=58736295, text=chunk, parse_mode=ParseMode.HTML)
