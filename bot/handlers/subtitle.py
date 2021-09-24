@@ -40,7 +40,8 @@ def send_subtitle(update: Update, context: CallbackContext):
             media=[
                 InputMediaDocument(StringIO(subs.text_transcription), filename=Path(subs.url_subtitles).stem + '.txt'),
                 InputMediaDocument(StringIO(subs.text_subtitles), filename=Path(subs.url_subtitles).name,
-                                   caption=f'[{subs.get_title()}]({jwurl})', parse_mode=ParseMode.MARKDOWN),
+                                   caption=f'[{subs.get_language_vernacular()} - {subs.get_title()}]({subs.generate_jwurl()})',
+                                   parse_mode=ParseMode.MARKDOWN),
             ],
         )
         return
