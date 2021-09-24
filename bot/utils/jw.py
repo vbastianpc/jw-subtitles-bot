@@ -62,6 +62,13 @@ class Subtitles:
                 return language['name']
         else:
             raise ValueError(f'No existe el idioma code={self.code_lang}')
+    
+    def get_language_vernacular(self):
+        for language in LANGUAGES:
+            if language['code'] == self.code_lang:
+                return language['vernacular'].capitalize()
+        else:
+            raise ValueError(f'No existe el idioma code={self.code_lang}')
 
     def generate_jwurl(self):
         return f'https://www.jw.org/finder?srcid=share&wtlocale={self.code_lang}&lank={self.lank}'
