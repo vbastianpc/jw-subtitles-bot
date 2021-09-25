@@ -26,7 +26,7 @@ def create_logger(name, fmt=None, datefmt=None):
     logger = logging.getLogger(name)
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
-    console_handler.setFormatter(Formatter(fmt or '%(asctime)s - %(name)s - %(funcName)s - %(message)s', datefmt or "%Y-%m-%d %H:%M:%S"))
+    console_handler.setFormatter(Formatter(fmt or '%(asctime)s - %(message)s', datefmt or "%Y-%m-%d %H:%M:%S"))
     logger.addHandler(console_handler)
     logger.setLevel(logging.INFO)
     return logger
