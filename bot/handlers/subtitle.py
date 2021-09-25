@@ -29,8 +29,7 @@ def send_subtitle(update: Update, context: CallbackContext):
     except SubtitleNotFound as e:
         text = f'Lo siento, no existen subtítulos para el video\n*{e.title}*\nen el idioma *{e.lang_name}*'
     else:
-        logger.info('%s', subs.url_subtitles)
-        logger.info('%s', subs.get_title())
+        logger.info('[%s](%s)', subs.get_title(), subs.url_subtitles)
         try:
             update.message.reply_photo(subs.get_image())
         except:

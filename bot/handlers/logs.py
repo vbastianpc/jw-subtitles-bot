@@ -24,6 +24,7 @@ def logs(update: Update, conttext: CallbackContext):
         datalogs = f.read()
     update.message.reply_text(
         text=datalogs[-MAX_MESSAGE_LENGTH::],
+        parse_mode=ParseMode.MARKDOWN,
         disable_web_page_preview=True
     )
 

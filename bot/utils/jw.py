@@ -75,7 +75,7 @@ class Subtitles:
 
     def get_datajson(self):
         url = API_MEDIATOR.format(code_lang=self.code_lang, lank=self.lank)
-        logger.info('url_data = %s', url)
+        logger.info('[%s %s](%s)', self.code_lang, self.lank, url)
         data = requests.get(url).json()
         if not data['media']:
             raise PubMediaNotFound(url)
