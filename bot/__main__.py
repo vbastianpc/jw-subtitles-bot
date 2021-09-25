@@ -1,13 +1,11 @@
 from telegram.ext import Updater
-from telegram.constants import MAX_MESSAGE_LENGTH
-
 from bot import create_logger, TOKEN
-from bot.handlers import handlers, error_handler
+from bot.handlers import handlers
+from bot.handlers.logs import error_handler
 
 
 logger = create_logger(__name__)
 logger.info('Iniciando bot')
-
 
 updater = Updater(TOKEN)
 updater.start_polling()
