@@ -11,6 +11,7 @@ from telegram.constants import MAX_MESSAGE_LENGTH
 from telegram.ext.filters import Filters
 
 from bot import create_logger, DEV
+from bot.utils.decorators import log
 
 
 logger = create_logger(__name__)
@@ -21,7 +22,7 @@ def logfile(update: Update, context: CallbackContext):
         document=open('./log.log', 'rb'),
     )
 
-def logs(update: Update, conttext: CallbackContext):
+def logs(update: Update, context: CallbackContext):
     with open('./log.log', 'r', encoding='utf-8') as f:
         datalogs = f.read()
     update.message.reply_text(
@@ -30,7 +31,7 @@ def logs(update: Update, conttext: CallbackContext):
         disable_web_page_preview=True
     )
 
-@logs
+@log
 def fallback_text(update: Update, context: CallbackContext):
     pass
 
