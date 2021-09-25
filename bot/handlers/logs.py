@@ -6,7 +6,9 @@ from telegram import Update
 from telegram.ext import CallbackContext
 from telegram import ParseMode
 from telegram.ext import CommandHandler
+from telegram.ext import MessageHandler
 from telegram.constants import MAX_MESSAGE_LENGTH
+from telegram.ext.filters import Filters
 
 from bot import create_logger, DEV
 
@@ -27,6 +29,10 @@ def logs(update: Update, conttext: CallbackContext):
         parse_mode=ParseMode.MARKDOWN,
         disable_web_page_preview=True
     )
+
+@logs
+def fallback_text(update: Update, context: CallbackContext):
+    pass
 
 def error_handler(update: object, context: CallbackContext) -> None:
     logger.error(msg="Exception while handling an update:", exc_info=context.error)
@@ -52,3 +58,4 @@ def error_handler(update: object, context: CallbackContext) -> None:
 
 logfile_handler = CommandHandler('logfile', logfile)
 logs_handler = CommandHandler('logs', logs)
+fallback_text_handler = MessageHandler(Filters.text, fallback_text)
