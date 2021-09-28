@@ -8,8 +8,8 @@ logger = create_logger(__name__)
 logger.info('Iniciando bot')
 
 updater = Updater(TOKEN)
-updater.start_polling()
 for handler in handlers:
     updater.dispatcher.add_handler(handler)
 updater.dispatcher.add_error_handler(error_handler)
+updater.start_polling()
 updater.idle()
