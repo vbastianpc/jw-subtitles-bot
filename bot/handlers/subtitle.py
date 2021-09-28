@@ -18,14 +18,22 @@ from bot import create_logger
 logger = create_logger(__name__)
 
 @log
-def send_subtitle(update: Update, context: CallbackContext):
-    jwurl = update.message.text
+def parse_urls(update: Update, context: CallbackContext):
+    urls = list(update.message.parse_entities([MessageEntity.URL]).values())
+    jwurls = [url for url in urls if url.startswith('https://www.jw.org')]
+    print(*jwurls, sep='\n')
+    for jwurl in jwurls:
+        send_subtitle(update, context, jwurl)
+    return
+
+
+def send_subtitle(update, context, jwurl):
     try:
         subs = Subtitles(jwurl)
     except PubMediaNotFound:
-        text = f'Lo siento, esa publicación no está disponible'
+        text = f'Lo siento, esta [publicación]({jwurl}) no está disponible'
     except (ValueError, IndexError, KeyError) as e:
-        text = f'No hay subtítulos en este enlace. Busca en la {SECCION_DE_VIDEOS} o en la app JW Library y envíame el enlace'
+        text = f'No hay subtítulos en [este enlace]({jwurl}). Busca en la {SECCION_DE_VIDEOS} o en la app JW Library y envíame el enlace'
     except SubtitleNotFound as e:
         text = f'Lo siento, no existen subtítulos para el video\n*{e.title}*\nen el idioma *{e.lang_name}*'
     else:
@@ -48,4 +56,4 @@ def send_subtitle(update: Update, context: CallbackContext):
     update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
 
 
-subtitle_handler = MessageHandler(Filters.regex('https://www.jw.org'), send_subtitle)
+subtitle_handler = MessageHandler(Filters.entity(MessageEntity.URL), parse_urls)
