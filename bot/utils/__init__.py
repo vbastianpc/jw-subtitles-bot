@@ -21,5 +21,5 @@ API_PUBMEDIA = 'https://b.jw-cdn.org/apis/pub-media/GETPUBMEDIALINKS?docid={doci
 _GET_CATEGORY = 'https://www.jw.org/es/biblioteca/videos/?item=pub-jwb-082_1_VIDEO&appLanguage=S'
 SEARCH = 'https://data.jw-api.org/search/query'
 SAMPLE_URL = 'https://www.jw.org/finder?srcid=jwlshare&wtlocale=S&lank=pub-jwb-082_1_VIDEO'
-SAMPLE_URL = 'https://www.jw.org/es/biblioteca/videos/#es/mediaitems/StudioMonthlyPrograms/pub-jwb-082_1_VIDEO'
+SAMPLE_URL2 = 'https://www.jw.org/es/biblioteca/videos/#es/mediaitems/StudioMonthlyPrograms/pub-jwb-082_1_VIDEO'
 SECCION_DE_VIDEOS = '[sección de videos](https://www.jw.org/es/biblioteca/videos)'
