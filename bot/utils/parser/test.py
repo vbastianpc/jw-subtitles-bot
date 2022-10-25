@@ -7,78 +7,51 @@ import re
 
 import webvtt
 
-
 from bot.utils import API_DOCID, API_PUB, LANGUAGES, API_MEDIATOR
-from bot import create_logger
 
 
-logger = create_logger(__name__)
+
+def by_lank(lang_code: str, lank: str):
+    url_api = API_MEDIATOR.format(lang_code=lang_code, lank=lank)
+    return requests.get(url_api).json()
+
+def by_docid(lang_code: str, docid: str):
+    url_api = API_DOCID.format(lang_code=lang_code, docid=docid)
+    return requests.get(url_api).json()
+
+def by_pub(lang_code: str, pub: str, track=None):
+    url_api = API_PUB.format(lang_code=lang_code, pub=pub, track=track)
+    return requests.get(url_api).json()
 
 
-class SubtitleNotFound(Exception):
-    def __init__(self, title, lang_name):
-        self.title = title
-        self.lang_name = lang_name
-
-class PubMediaNotFound(Exception):
-    pass
-
-class Publication:
-    def __init__(self):
-        self.docid = None
-        self.lang_code = None
-        self.lank = None
-        self.pub = None
-        self.track = None
-    
-    def url_api(self):
-        return
-
-    def url_vtt(self):
-        return
-    
-    def url_video(self):
-        return
-
-class JWURLParser:
-    def __init__(self, jwurl):
-        self.jwurl = jwurl
-    
-    def scrappy(self):
-        response = requests.get(self.jwurl, headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36'})
-        pattern = r'data-jsonurl=["\'](https:[\w\-\./]+GETPUBMEDIALINKS\?[\w=&%]+)["\']'
-        match = re.search(pattern, response.content.decode())
-        return match.group(1)
-
-# browser.page.find('body').get('class') buscar pub y generar link pubmedialink
-
-# class JWSubtitles
-# class JWSubtitlesLank
-# class JWSubtitlesDocid
 class Subtitles:
     def __init__(self, jwurl=None, lang_code=None, lank=None, docid=None, pub=None, track=None):
         if jwurl:
             lang_code, lank, docid, pub, track = self.parse_jwurl()
-        if lang_code:
-            if lank:
-                url_api = API_MEDIATOR.format(lang_code=lang_code, lank=lank)
-            elif docid:
-                url_api = API_DOCID.format(lang_code=lang_code, docid=docid)
-            elif pub and track:
-                url_api = API_PUB.format(lang_code=lang_code, pub=pub, track=track)
-            else:
-                raise TypeError("some required argument missing 'lank', 'docid' or ('pub' and 'track')")
+        if lang_code and lank:
+            url_api = API_MEDIATOR.format(lang_code=lang_code, lank=lank)
+        elif lang_code and docid:
+            url_api = API_DOCID.format(lang_code=lang_code, docid=docid)
+        elif lang_code and pub and track:
+            url_api = API_PUB.format(lang_code=lang_code, pub=pub, track=track)
         else:
-            raise TypeError("missing required argument 'lang_code'")
-        print(url_api)
-        return
+            pass
         data = requests.get(url_api).json()
 
+
+
+
+        self.url = url
+        if lang_code and any(lank, docid):
+            self.lang_code = lang_code
+            self.lank = lank
+            self.docid = docid
+        else:
+            self.parse_jwurl()
 
         self.url_subtitles = self.get_url_subtitles()
         self.text_subtitles = self.get_text_subtitles(self.url_subtitles)
         self.text_transcription = self.get_text_transcription(self.text_subtitles, self.title)
-        self.photo = None
 
     def parse_jwurl(self):
         up = urlparse(self.url)

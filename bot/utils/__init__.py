@@ -15,9 +15,11 @@ def write_langs():
 write_langs()
 
 LANGUAGES = json.load(LANG_PATH.open(encoding='utf-8'))
-API_MEDIATOR = 'https://b.jw-cdn.org/apis/mediator/v1/media-items/{code_lang}/{lank}?clientType=www'
-API_MEDIATOR_CAT = 'https://b.jw-cdn.org/apis/mediator/v1/categories/{code_lang}/{category}?detailed=1&clientType=www'
-API_PUBMEDIA = 'https://b.jw-cdn.org/apis/pub-media/GETPUBMEDIALINKS?docid={docid}&output=json&fileformat=mp4,3gp,mp3&alllangs=1&track=1&langwritten={code_lang}&txtCMSLang={code_lang}'
+API_MEDIATOR = 'https://b.jw-cdn.org/apis/mediator/v1/media-items/{lang_code}/{lank}?clientType=www'
+API_DOCID = 'https://b.jw-cdn.org/apis/pub-media/GETPUBMEDIALINKS?output=json&fileformat=mp4&alllangs=0&langwritten={lang_code}&txtCMSLang={lang_code}&docid={docid}&track=1'
+API_PUB =   'https://b.jw-cdn.org/apis/pub-media/GETPUBMEDIALINKS?output=json&fileformat=mp4&alllangs=0&langwritten={lang_code}&txtCMSLang={lang_code}&pub={pub}&track={track}'
+wol_link_api_url = "https://b.jw-cdn.org/apis/wol-link"
+API_MEDIATOR_CAT = 'https://b.jw-cdn.org/apis/mediator/v1/categories/{lang_code}/{category}?detailed=1&clientType=www'
 _GET_CATEGORY = 'https://www.jw.org/es/biblioteca/videos/?item=pub-jwb-082_1_VIDEO&appLanguage=S'
 SEARCH = 'https://data.jw-api.org/search/query'
 SAMPLE_URL = 'https://www.jw.org/finder?srcid=jwlshare&wtlocale=S&lank=pub-jwb-082_1_VIDEO'

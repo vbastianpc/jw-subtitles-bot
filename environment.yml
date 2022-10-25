@@ -1,7 +1,9 @@
 name: jwsubs-bot
 dependencies:
-  - python=3.9
+  - python=3.10
+  - pip
   - pip:
-    - python-telegram-bot-13.7
+    - python-telegram-bot==13.9
     - requests
     - webvtt-py
+    - mechanicalsoup
