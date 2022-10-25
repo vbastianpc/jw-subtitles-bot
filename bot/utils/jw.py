@@ -38,7 +38,7 @@ class Subtitles:
     def parse_jwurl(self):
         up = urlparse(self.url)
         pq = parse_qs(up.query)
-        if up.path == '/finder':
+        if up.path in ['/finder', '/open']:
             code_lang = pq['wtlocale'][0]
             lank = pq['lank'][0]
         elif '/mediaitems/' in up.fragment:
